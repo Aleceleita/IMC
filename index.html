@@ -4,13 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Control de Peso e IMC Pro</title>
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
-    <!-- FontAwesome para iconos -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
@@ -44,6 +41,81 @@
             color: var(--text-main);
             min-height: 100vh;
             padding-bottom: 50px;
+        }
+
+        /* PANTALLA DE LOGUEO */
+        .login-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 20px;
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        }
+
+        .login-card {
+            background: var(--card);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+        }
+
+        .login-icon {
+            width: 64px;
+            height: 64px;
+            background-color: var(--primary-light);
+            color: var(--primary);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            margin: 0 auto 20px;
+        }
+
+        .login-card h2 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            margin-bottom: 8px;
+            justify-content: center;
+        }
+
+        .login-card p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-bottom: 32px;
+        }
+
+        .btn-google {
+            width: 100%;
+            background-color: white;
+            color: #374151;
+            border: 1px solid #d1d5db;
+            padding: 12px 16px;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-google:hover {
+            background-color: #f9fafb;
+            border-color: #e5e7eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-google img {
+            width: 20px;
+            height: 20px;
         }
 
         /* BANNER SUPERIOR */
@@ -82,6 +154,11 @@
             letter-spacing: -0.5px;
         }
 
+        .header-actions {
+            display: flex;
+            gap: 12px;
+        }
+
         .btn-history {
             background-color: rgba(255, 255, 255, 0.1);
             color: white;
@@ -101,6 +178,22 @@
             background-color: white;
             color: #1e1b4b;
             transform: translateY(-1px);
+        }
+
+        .btn-logout {
+            background-color: transparent;
+            color: #f87171;
+            border: 1px solid rgba(248, 113, 113, 0.2);
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-logout:hover {
+            background-color: rgba(248, 113, 113, 0.1);
         }
 
         /* CONTENEDOR PRINCIPAL */
@@ -232,7 +325,6 @@
             box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
 
-        /* Bloqueo sutil si falta la altura */
         .form-disabled-overlay {
             position: absolute;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -249,7 +341,6 @@
             color: var(--text-muted);
         }
 
-        /* Botones de atajo de fechas */
         .date-shortcuts {
             display: flex;
             gap: 8px;
@@ -287,7 +378,7 @@
 
         .btn-action:hover { background-color: var(--primary-hover); }
 
-        /* ALERTA EMERGENTE (TOAST DE IMC - 30 SEGUNDOS) */
+        /* TOAST DE IMC */
         .toast-container {
             position: fixed;
             top: 80px;
@@ -326,7 +417,6 @@
         .toast-progress-bar { height: 100%; width: 100%; transform-origin: left; }
         .toast.active .toast-progress-bar { animation: shrinkProgress 30s linear forwards; }
 
-        /* Colores Rangos Toast */
         .bajo-peso .toast-value { color: #2563eb; } .bajo-peso .toast-progress-bar { background-color: #2563eb; } .bajo-peso .badge { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
         .normal .toast-value { color: #059669; } .normal .toast-progress-bar { background-color: #059669; } .normal .badge { background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
         .sobrepeso .toast-value { color: #d97706; } .sobrepeso .toast-progress-bar { background-color: #d97706; } .sobrepeso .badge { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
@@ -371,7 +461,6 @@
             display: flex; align-items: center; justify-content: center;
         }
 
-        /* Acciones de Respaldo */
         .backup-actions {
             display: flex;
             gap: 12px;
@@ -407,114 +496,128 @@
 </head>
 <body>
 
-<!-- Contenedor de la Notificación Flotante -->
-<div class="toast-container">
-    <div id="imcToast" class="toast">
-        <div class="toast-body">
-            <div class="toast-header">
-                <span class="toast-title"><i class="fa-solid fa-square-poll-horizontal"></i> Resultado Calculado</span>
-                <button id="btnToastClose" class="btn-toast-close"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="toast-content">
-                <div id="toastValue" class="toast-value">--</div>
-                <div><span id="toastBadge" class="badge">--</span></div>
-            </div>
-            <div id="toastMotivation" class="motivation-text">--</div>
-        </div>
-        <div class="toast-progress"><div class="toast-progress-bar"></div></div>
-    </div>
-</div>
-
-<header class="banner">
-    <div class="banner-container">
-        <div class="banner-title">
+<div id="loginScreen" class="login-screen">
+    <div class="login-card">
+        <div class="login-icon">
             <i class="fa-solid fa-heart-pulse"></i>
-            <h1>Control de Peso e IMC</h1>
         </div>
-        <button id="btnOpenHistory" class="btn-history">
-            <i class="fa-solid fa-clock-history"></i> Historial
+        <h2>¡Te damos la bienvenida!</h2>
+        <p>Gestiona y analiza de manera profesional tu evolución corporal diaria.</p>
+        <button id="btnLoginGoogle" class="btn-google">
+            <img src="https://fonts.gstatic.com/solid/shortcut/v1/googlewebfonts/v30/google-icon.svg" alt="Google Logo">
+            Iniciar sesión con Google
         </button>
     </div>
-</header>
+</div>
 
-<div class="container">
-    <!-- Indicadores Rápidos (KPIs) -->
-    <div class="kpi-grid">
-        <div class="kpi-card">
-            <div class="kpi-info"><p>Último Peso</p><h3 id="kpiWeight">-- kg</h3></div>
-            <div class="kpi-icon kpi-blue"><i class="fa-solid fa-weight-scale"></i></div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-info"><p>IMC Actual</p><h3 id="kpiImc">--</h3></div>
-            <div class="kpi-icon kpi-purple"><i class="fa-solid fa-calculator"></i></div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-info"><p>Evolución Total</p><h3 id="kpiDiff">-- kg</h3></div>
-            <div class="kpi-icon kpi-emerald" id="kpiDiffIcon"><i class="fa-solid fa-right-left"></i></div>
+<div id="appContainer" style="display: none;">
+    <div class="toast-container">
+        <div id="imcToast" class="toast">
+            <div class="toast-body">
+                <div class="toast-header">
+                    <span class="toast-title"><i class="fa-solid fa-square-poll-horizontal"></i> Resultado Calculado</span>
+                    <button id="btnToastClose" class="btn-toast-close"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+                <div class="toast-content">
+                    <div id="toastValue" class="toast-value">--</div>
+                    <div><span id="toastBadge" class="badge">--</span></div>
+                </div>
+                <div id="toastMotivation" class="motivation-text">--</div>
+            </div>
+            <div class="toast-progress"><div class="toast-progress-bar"></div></div>
         </div>
     </div>
 
-    <div class="main-grid">
-        <div>
-            <!-- Configuración de Altura Fija -->
-            <div class="card">
-                <h2><i class="fa-solid fa-user-gear"></i> Datos de Perfil</h2>
-                <div class="form-group">
-                    <label for="height">Altura Fija (cm):</label>
-                    <div class="input-wrapper">
-                        <i class="fa-solid fa-ruler-vertical"></i>
-                        <input type="number" id="height" step="1" placeholder="Ej. 175">
-                    </div>
-                </div>
-                <button id="btnSaveProfile" class="btn-action" style="background-color: #64748b;">Guardar / Actualizar Altura</button>
+    <header class="banner">
+        <div class="banner-container">
+            <div class="banner-title">
+                <i class="fa-solid fa-heart-pulse"></i>
+                <h1>Control de Peso e IMC</h1>
             </div>
+            <div class="header-actions">
+                <button id="btnOpenHistory" class="btn-history">
+                    <i class="fa-solid fa-clock-history"></i> Historial
+                </button>
+                <button id="btnLogout" class="btn-logout">
+                    <i class="fa-solid fa-arrow-right-from-bracket"></i> Salir
+                </button>
+            </div>
+        </div>
+    </header>
 
-            <!-- Entrada de Datos Diarios -->
-            <div class="card">
-                <!-- Capa de bloqueo controlado si no hay altura asignada -->
-                <div id="formOverlay" class="form-disabled-overlay" style="display: none;">
-                    <div>
-                        <i class="fa-solid fa-lock" style="font-size: 1.6rem; color: #4f46e5; margin-bottom: 12px;"></i>
-                        <p>Asigna tu altura en la sección de arriba para habilitar el registro diario.</p>
-                    </div>
-                </div>
-
-                <h2><i class="fa-solid fa-calendar-plus"></i> Registro Diario</h2>
-                <form id="weightForm">
-                    <div class="form-group">
-                        <label for="weight">Peso registrado (kg):</label>
-                        <div class="input-wrapper">
-                            <i class="fa-solid fa-weight-scale"></i>
-                            <input type="number" id="weight" step="0.1" placeholder="Ej. 70.5" required>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="date">Fecha del registro:</label>
-                        <div class="input-wrapper">
-                            <i class="fa-solid fa-calendar-day"></i>
-                            <input type="date" id="date" required>
-                        </div>
-                        <div class="date-shortcuts">
-                            <button type="button" id="btnToday" class="btn-shortcut active">Hoy</button>
-                            <button type="button" id="btnYesterday" class="btn-shortcut">Ayer</button>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn-action">Guardar Registro</button>
-                </form>
+    <div class="container">
+        <div class="kpi-grid">
+            <div class="kpi-card">
+                <div class="kpi-info"><p>Último Peso</p><h3 id="kpiWeight">-- kg</h3></div>
+                <div class="kpi-icon kpi-blue"><i class="fa-solid fa-weight-scale"></i></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-info"><p>IMC Actual</p><h3 id="kpiImc">--</h3></div>
+                <div class="kpi-icon kpi-purple"><i class="fa-solid fa-calculator"></i></div>
+            </div>
+            <div class="kpi-card">
+                <div class="kpi-info"><p>Evolución Total</p><h3 id="kpiDiff">-- kg</h3></div>
+                <div class="kpi-icon kpi-emerald" id="kpiDiffIcon"><i class="fa-solid fa-right-left"></i></div>
             </div>
         </div>
 
-        <!-- Sección de Análisis Visual -->
-        <div class="card">
-            <h2><i class="fa-solid fa-chart-line"></i> Línea de Evolución Temporal</h2>
-            <div class="chart-container">
-                <canvas id="weightChart"></canvas>
+        <div class="main-grid">
+            <div>
+                <div class="card">
+                    <h2><i class="fa-solid fa-user-gear"></i> Datos de Perfil</h2>
+                    <div class="form-group">
+                        <label for="height">Altura Fija (cm):</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-ruler-vertical"></i>
+                            <input type="number" id="height" step="1" placeholder="Ej. 175">
+                        </div>
+                    </div>
+                    <button id="btnSaveProfile" class="btn-action" style="background-color: #64748b;">Guardar / Actualizar Altura</button>
+                </div>
+
+                <div class="card">
+                    <div id="formOverlay" class="form-disabled-overlay" style="display: none;">
+                        <div>
+                            <i class="fa-solid fa-lock" style="font-size: 1.6rem; color: #4f46e5; margin-bottom: 12px;"></i>
+                            <p>Asigna tu altura en la sección de arriba para habilitar el registro diario.</p>
+                        </div>
+                    </div>
+
+                    <h2><i class="fa-solid fa-calendar-plus"></i> Registro Diario</h2>
+                    <form id="weightForm">
+                        <div class="form-group">
+                            <label for="weight">Peso registrado (kg):</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-weight-scale"></i>
+                                <input type="number" id="weight" step="0.1" placeholder="Ej. 70.5" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="date">Fecha del registro:</label>
+                            <div class="input-wrapper">
+                                <i class="fa-solid fa-calendar-day"></i>
+                                <input type="date" id="date" required>
+                            </div>
+                            <div class="date-shortcuts">
+                                <button type="button" id="btnToday" class="btn-shortcut active">Hoy</button>
+                                <button type="button" id="btnYesterday" class="btn-shortcut">Ayer</button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-action">Guardar Registro</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fa-solid fa-chart-line"></i> Línea de Evolución Temporal</h2>
+                <div class="chart-container">
+                    <canvas id="weightChart"></canvas>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Ventana de Historial de Registros -->
 <div id="historyModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -522,7 +625,6 @@
             <button id="btnCloseHistory" class="btn-close"><i class="fa-solid fa-xmark"></i></button>
         </div>
         
-        <!-- Herramientas de Importación/Exportación Local (Opcionales por si quieres usarlas offline) -->
         <div class="backup-actions">
             <button id="btnExport" class="btn-backup"><i class="fa-solid fa-download" style="color: #059669;"></i> Exportar a JSON</button>
             <button id="btnImportClick" class="btn-backup"><i class="fa-solid fa-upload" style="color: #2563eb;"></i> Importar desde JSON</button>
@@ -540,16 +642,17 @@
     </div>
 </div>
 
-<!-- CONFIGURACIÓN DE FIREBASE Y LÓGICA DE LA APLICACIÓN -->
 <script type="module">
-    // Importación de módulos SDK de Firebase v10+ vía CDN
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
     import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
     import { 
         getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, query, orderBy 
     } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+    // IMPORTANTE: Módulo de Autenticación añadido
+    import { 
+        getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged 
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
-    // Tu configuración web de Firebase entregada
     const firebaseConfig = {
         apiKey: "AIzaSyBwH4V6-IHmRqK-YYNd6pRfgtHhOYuUIzU",
         authDomain: "registro-de-peso-dd721.firebaseapp.com",
@@ -560,12 +663,19 @@
         measurementId: "G-Q545TTN4GR"
     };
 
-    // Inicializar Firebase e Instancias
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
+    const auth = getAuth(app); // Instancia de Auth
+    const provider = new GoogleAuthProvider();
 
-    // Referencias de Elementos de la UI
+    // Elementos de Autenticación en DOM
+    const loginScreen = document.getElementById('loginScreen');
+    const appContainer = document.getElementById('appContainer');
+    const btnLoginGoogle = document.getElementById('btnLoginGoogle');
+    const btnLogout = document.getElementById('btnLogout');
+
+    // Resto de referencias UI
     const weightForm = document.getElementById('weightForm');
     const heightInput = document.getElementById('height');
     const weightInput = document.getElementById('weight');
@@ -576,7 +686,6 @@
     
     const btnToday = document.getElementById('btnToday');
     const btnYesterday = document.getElementById('btnYesterday');
-
     const btnExport = document.getElementById('btnExport');
     const btnImportClick = document.getElementById('btnImportClick');
     const fileImport = document.getElementById('fileImport');
@@ -600,29 +709,65 @@
     let weightChart;
     let healthData = [];
     let userHeight = "";
+    let currentUser = null; // Guardará el objeto del usuario logueado
 
     const todayStr = new Date().toISOString().split('T')[0];
     dateInput.value = todayStr;
 
-    // Inicialización asíncrona conectada a Firestore
-    async function startApplication() {
-        await loadUserDataFromFirestore();
-        initUI();
-    }
+    // ESCUCHADOR DE ESTADO DE AUTENTICACIÓN
+    onAuthStateChanged(auth, async (user) => {
+        if (user) {
+            currentUser = user;
+            loginScreen.style.display = 'none';
+            appContainer.style.display = 'block';
+            
+            // Cargar datos exclusivos del usuario conectado
+            await loadUserDataFromFirestore();
+            initUI();
+        } else {
+            currentUser = null;
+            appContainer.style.display = 'none';
+            loginScreen.style.display = 'flex';
+        }
+    });
 
-    // 1. Cargar Datos desde Firestore de forma asíncrona
-    async function loadUserDataFromFirestore() {
+    // EVENTOS DE LOGIN Y LOGOUT
+    btnLoginGoogle.addEventListener('click', async () => {
         try {
-            // Cargar Altura del Perfil único (Documento fijo en la colección 'perfil')
-            const profileRef = doc(db, "perfil", "usuario_unico");
+            await signInWithPopup(auth, provider);
+        } catch (error) {
+            console.error("Error al iniciar sesión con Google: ", error);
+            alert("No se pudo completar el inicio de sesión.");
+        }
+    });
+
+    btnLogout.addEventListener('click', async () => {
+        if(confirm("¿Seguro que deseas cerrar sesión?")) {
+            try {
+                await signOut(auth);
+            } catch (error) {
+                console.error("Error al cerrar sesión: ", error);
+            }
+        }
+    });
+
+    // CARGA DE DATOS SEGMENTADA POR USUARIO
+    async function loadUserDataFromFirestore() {
+        if (!currentUser) return;
+        try {
+            // Guardar perfil usando el UID como clave única
+            const profileRef = doc(db, "perfil", currentUser.uid);
             const profileSnap = await getDoc(profileRef);
             if (profileSnap.exists()) {
                 userHeight = profileSnap.data().height || "";
                 heightInput.value = userHeight;
+            } else {
+                userHeight = "";
+                heightInput.value = "";
             }
 
-            // Cargar Colección de Registros Diarios ordenados por fecha cronológicamente
-            const recordsRef = collection(db, "registros");
+            // Guardar registros en una subcolección única por usuario
+            const recordsRef = collection(db, "usuarios", currentUser.uid, "registros");
             const q = query(recordsRef, orderBy("date", "asc"));
             const querySnapshot = await getDocs(q);
             
@@ -643,14 +788,10 @@
     }
 
     function checkFormLock() {
-        if (!userHeight || userHeight <= 0) {
-            formOverlay.style.display = "flex";
-        } else {
-            formOverlay.style.display = "none";
-        }
+        formOverlay.style.display = (!userHeight || userHeight <= 0) ? "flex" : "none";
     }
 
-    // Atajos Rápidos de fecha
+    // Atajos de fecha
     btnToday.addEventListener('click', () => {
         dateInput.value = todayStr;
         btnToday.classList.add('active');
@@ -672,8 +813,7 @@
         } else {
             const yesterday = new Date();
             yesterday.setDate(yesterday.getDate() - 1);
-            const yesterdayStr = yesterday.toISOString().split('T')[0];
-            if (dateInput.value === yesterdayStr) {
+            if (dateInput.value === yesterday.toISOString().split('T')[0]) {
                 btnYesterday.classList.add('active');
                 btnToday.classList.remove('active');
             } else {
@@ -739,13 +879,14 @@
 
     btnToastClose.addEventListener('click', () => { clearTimeout(toastTimeout); imcToast.classList.remove('active'); });
 
-    // 2. Guardar Altura en Firestore
     btnSaveProfile.addEventListener('click', async () => {
+        if (!currentUser) return;
         const val = heightInput.value;
         if(val && val > 0) {
             userHeight = val;
             try {
-                await setDoc(doc(db, "perfil", "usuario_unico"), { height: val });
+                await setDoc(doc(db, "perfil", currentUser.uid), { height: val });
+                alert("Altura de perfil actualizada.");
             } catch (e) {
                 console.error("Error guardando altura en Firestore: ", e);
             }
@@ -759,10 +900,9 @@
     btnCloseHistory.addEventListener('click', () => historyModal.classList.remove('active'));
     window.addEventListener('click', (e) => { if (e.target === historyModal) historyModal.classList.remove('active'); });
 
-    // 3. Crear / Actualizar Registro de peso en Firestore
     weightForm.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (!userHeight) return;
+        if (!userHeight || !currentUser) return;
 
         const weight = parseFloat(weightInput.value);
         const date = dateInput.value;
@@ -771,19 +911,17 @@
         const imcInfo = getImcInfo(imc);
 
         showImcToast(imc, imcInfo);
-
         const newRecordData = { date, weight, height: parseFloat(userHeight), imc };
         
         try {
-            // Verificar si la fecha ya existe para sobreescribir o crear nuevo
+            const recordsRef = collection(db, "usuarios", currentUser.uid, "registros");
             const existingItem = healthData.find(item => item.date === date);
             if (existingItem) {
-                await setDoc(doc(db, "registros", existingItem.id), newRecordData);
+                await setDoc(doc(db, "usuarios", currentUser.uid, "registros", existingItem.id), newRecordData);
             } else {
-                await addDoc(collection(db, "registros"), newRecordData);
+                await addDoc(recordsRef, newRecordData);
             }
             
-            // Recargar datos y refrescar interfaz
             await loadUserDataFromFirestore();
             weightInput.value = '';
             initUI();
@@ -792,23 +930,10 @@
         }
     });
 
-    // 4. Eliminar Registro en Firestore
-    window.deleteRecord = async function(id) {
-        if(confirm("¿Estás seguro de eliminar este registro de la base de datos externa?")) {
-            try {
-                await deleteDoc(doc(db, "registros", id));
-                await loadUserDataFromFirestore();
-                initUI();
-            } catch (error) {
-                console.error("Error eliminando documento: ", error);
-            }
-        }
-    }
-
     function renderTable() {
         tableBody.innerHTML = '';
         if (healthData.length === 0) {
-            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Sin registros disponibles en Firestore.</td></tr>`;
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Sin registros disponibles.</td></tr>`;
             return;
         }
         [...healthData].reverse().forEach(item => {
@@ -819,11 +944,26 @@
                 <td>${item.weight} kg</td>
                 <td>${item.height} cm</td>
                 <td><span class="badge ${imcInfo.class}">${item.imc} - ${imcInfo.label}</span></td>
-                <td><button class="btn-delete" onclick="deleteRecord('${item.id}')">Eliminar</button></td>
+                <td><button class="btn-delete" data-id="${item.id}">Eliminar</button></td>
             `;
             tableBody.appendChild(row);
         });
     }
+
+    tableBody.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('btn-delete') && currentUser) {
+            const id = e.target.getAttribute('data-id');
+            if(confirm("¿Estás seguro de eliminar este registro?")) {
+                try {
+                    await deleteDoc(doc(db, "usuarios", currentUser.uid, "registros", id));
+                    await loadUserDataFromFirestore();
+                    initUI();
+                } catch (error) {
+                    console.error("Error eliminando documento: ", error);
+                }
+            }
+        }
+    });
 
     function renderChart() {
         const ctx = document.getElementById('weightChart').getContext('2d');
@@ -843,16 +983,16 @@
                 if(healthData.length === 0) return;
                 const { ctx, chartArea: { top, bottom, left, right }, scales: { y } } = chart;
                 function drawBand(yStart, yEnd, color) {
-                    const canvasYStart = Math.max(y.getPixelForValue(yStart), top);
-                    const canvasYEnd = Math.min(y.getPixelForValue(yEnd), bottom);
-                    if(canvasYStart > bottom || canvasYEnd < top) return;
-                    ctx.fillStyle = color; ctx.fillRect(left, canvasYStart, right - left, canvasYEnd - canvasYStart);
+                    const canvasYStart = Math.min(Math.max(y.getPixelForValue(yStart), top), bottom);
+                    const canvasYEnd = Math.min(Math.max(y.getPixelForValue(yEnd), top), bottom);
+                    ctx.fillStyle = color; 
+                    ctx.fillRect(left, canvasYStart, right - left, canvasYEnd - canvasYStart);
                 }
                 ctx.save();
-                drawBand(y.max, limitBajo, 'rgba(59, 130, 246, 0.03)');
-                drawBand(limitBajo, limitNormal, 'rgba(16, 185, 129, 0.03)');
-                drawBand(limitNormal, limitSobre, 'rgba(245, 158, 11, 0.03)');
-                drawBand(limitSobre, y.min, 'rgba(239, 68, 110, 0.03)');
+                drawBand(y.max, limitBajo, 'rgba(59, 130, 246, 0.02)');
+                drawBand(limitBajo, limitNormal, 'rgba(16, 185, 129, 0.02)');
+                drawBand(limitNormal, limitSobre, 'rgba(245, 158, 11, 0.02)');
+                drawBand(limitSobre, y.min, 'rgba(239, 68, 68, 0.02)');
                 ctx.restore();
             }
         };
@@ -887,7 +1027,7 @@
         });
     }
 
-    // Funciones de Respaldo por JSON Manual (Compatibilidad local)
+    // Backup JSON Manual
     btnExport.addEventListener('click', () => {
         if(healthData.length === 0) return;
         const dataObj = { userHeight, healthData };
@@ -903,24 +1043,25 @@
     btnImportClick.addEventListener('click', () => fileImport.click());
     fileImport.addEventListener('change', (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file || !currentUser) return;
         const reader = new FileReader();
         reader.onload = async function(evt) {
             try {
                 const parsed = JSON.parse(evt.target.result);
                 if(parsed.userHeight && Array.isArray(parsed.healthData)) {
-                    // Migrar archivo local a Firestore masivamente
-                    await setDoc(doc(db, "perfil", "usuario_unico"), { height: parsed.userHeight });
+                    await setDoc(doc(db, "perfil", currentUser.uid), { height: parsed.userHeight });
+                    const recordsRef = collection(db, "usuarios", currentUser.uid, "registros");
                     for (const row of parsed.healthData) {
-                        await addDoc(collection(db, "registros"), {
+                        await addDoc(recordsRef, {
                             date: row.date,
                             weight: row.weight,
                             height: row.height,
                             imc: row.imc
                         });
                     }
-                    alert("¡Datos importados y subidos a Firestore con éxito!");
-                    await startApplication();
+                    alert("¡Datos importados con éxito!");
+                    await loadUserDataFromFirestore();
+                    initUI();
                     historyModal.classList.remove('active');
                 }
             } catch(err) {
@@ -929,9 +1070,6 @@
         };
         reader.readAsText(file);
     });
-
-    // Encendido Inicial
-    startApplication();
 </script>
 
 </body>
