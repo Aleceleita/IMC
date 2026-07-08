@@ -6,7 +6,7 @@
     <title>Control de Peso e IMC Pro</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
@@ -80,7 +80,6 @@
             font-size: 1.6rem;
             font-weight: 800;
             margin-bottom: 8px;
-            justify-content: center;
         }
 
         .login-card p {
@@ -648,7 +647,7 @@
     import { 
         getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, query, orderBy 
     } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-    // IMPORTANTE: Módulo de Autenticación añadido
+    // IMPORTACIÓN DE LOS MÓDULOS DE AUTENTICACIÓN
     import { 
         getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged 
     } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
@@ -666,16 +665,16 @@
     const app = initializeApp(firebaseConfig);
     const analytics = getAnalytics(app);
     const db = getFirestore(app);
-    const auth = getAuth(app); // Instancia de Auth
+    const auth = getAuth(app);
     const provider = new GoogleAuthProvider();
 
-    // Elementos de Autenticación en DOM
+    // Elementos del DOM para Auth
     const loginScreen = document.getElementById('loginScreen');
     const appContainer = document.getElementById('appContainer');
     const btnLoginGoogle = document.getElementById('btnLoginGoogle');
     const btnLogout = document.getElementById('btnLogout');
 
-    // Resto de referencias UI
+    // Referencias UI normales
     const weightForm = document.getElementById('weightForm');
     const heightInput = document.getElementById('height');
     const weightInput = document.getElementById('weight');
@@ -709,19 +708,19 @@
     let weightChart;
     let healthData = [];
     let userHeight = "";
-    let currentUser = null; // Guardará el objeto del usuario logueado
+    let currentUser = null; // Instancia global del usuario activo
 
     const todayStr = new Date().toISOString().split('T')[0];
     dateInput.value = todayStr;
 
-    // ESCUCHADOR DE ESTADO DE AUTENTICACIÓN
+    // ESCUCHADOR DE CAMBIOS DE ESTADO DE AUTENTICACIÓN
     onAuthStateChanged(auth, async (user) => {
         if (user) {
             currentUser = user;
             loginScreen.style.display = 'none';
             appContainer.style.display = 'block';
             
-            // Cargar datos exclusivos del usuario conectado
+            // Cargar de Firestore los datos del UID correspondiente
             await loadUserDataFromFirestore();
             initUI();
         } else {
@@ -731,18 +730,18 @@
         }
     });
 
-    // EVENTOS DE LOGIN Y LOGOUT
+    // EVENTOS DE MANEJO DE SESIÓN
     btnLoginGoogle.addEventListener('click', async () => {
         try {
             await signInWithPopup(auth, provider);
         } catch (error) {
             console.error("Error al iniciar sesión con Google: ", error);
-            alert("No se pudo completar el inicio de sesión.");
+            alert("No se pudo iniciar sesión con Google.");
         }
     });
 
     btnLogout.addEventListener('click', async () => {
-        if(confirm("¿Seguro que deseas cerrar sesión?")) {
+        if(confirm("¿Seguro que deseas cerrar tu sesión?")) {
             try {
                 await signOut(auth);
             } catch (error) {
@@ -751,11 +750,11 @@
         }
     });
 
-    // CARGA DE DATOS SEGMENTADA POR USUARIO
+    // RUTA CORRECTA PARA QUE TODO APAREZCA BAJO EL UID DEL USUARIO
     async function loadUserDataFromFirestore() {
         if (!currentUser) return;
         try {
-            // Guardar perfil usando el UID como clave única
+            // Cargar Altura desde: perfil/{UID}
             const profileRef = doc(db, "perfil", currentUser.uid);
             const profileSnap = await getDoc(profileRef);
             if (profileSnap.exists()) {
@@ -766,7 +765,7 @@
                 heightInput.value = "";
             }
 
-            // Guardar registros en una subcolección única por usuario
+            // Cargar Pesos e IMC desde la subcolección: usuarios/{UID}/registros
             const recordsRef = collection(db, "usuarios", currentUser.uid, "registros");
             const q = query(recordsRef, orderBy("date", "asc"));
             const querySnapshot = await getDocs(q);
@@ -879,6 +878,7 @@
 
     btnToastClose.addEventListener('click', () => { clearTimeout(toastTimeout); imcToast.classList.remove('active'); });
 
+    // Guardar Altura en Perfil
     btnSaveProfile.addEventListener('click', async () => {
         if (!currentUser) return;
         const val = heightInput.value;
@@ -900,6 +900,7 @@
     btnCloseHistory.addEventListener('click', () => historyModal.classList.remove('active'));
     window.addEventListener('click', (e) => { if (e.target === historyModal) historyModal.classList.remove('active'); });
 
+    // GUARDAR PESO, ALTURA E IMC JUNTOS EN EL MISMO DOCUMENTO EN FIRESTORE
     weightForm.addEventListener('submit', async (e) => {
         e.preventDefault();
         if (!userHeight || !currentUser) return;
@@ -911,11 +912,19 @@
         const imcInfo = getImcInfo(imc);
 
         showImcToast(imc, imcInfo);
-        const newRecordData = { date, weight, height: parseFloat(userHeight), imc };
+
+        // Aquí empaquetamos las 3 propiedades juntas en el objeto
+        const newRecordData = { 
+            date, 
+            weight: weight, 
+            height: parseFloat(userHeight), 
+            imc: parseFloat(imc) 
+        };
         
         try {
             const recordsRef = collection(db, "usuarios", currentUser.uid, "registros");
             const existingItem = healthData.find(item => item.date === date);
+            
             if (existingItem) {
                 await setDoc(doc(db, "usuarios", currentUser.uid, "registros", existingItem.id), newRecordData);
             } else {
@@ -927,6 +936,22 @@
             initUI();
         } catch (error) {
             console.error("Error al guardar registro en Firestore: ", error);
+        }
+    });
+
+    // Eliminar Registro
+    tableBody.addEventListener('click', async (e) => {
+        if (e.target.classList.contains('btn-delete') && currentUser) {
+            const id = e.target.getAttribute('data-id');
+            if(confirm("¿Estás seguro de eliminar este registro?")) {
+                try {
+                    await deleteDoc(doc(db, "usuarios", currentUser.uid, "registros", id));
+                    await loadUserDataFromFirestore();
+                    initUI();
+                } catch (error) {
+                    console.error("Error eliminando documento: ", error);
+                }
+            }
         }
     });
 
@@ -949,21 +974,6 @@
             tableBody.appendChild(row);
         });
     }
-
-    tableBody.addEventListener('click', async (e) => {
-        if (e.target.classList.contains('btn-delete') && currentUser) {
-            const id = e.target.getAttribute('data-id');
-            if(confirm("¿Estás seguro de eliminar este registro?")) {
-                try {
-                    await deleteDoc(doc(db, "usuarios", currentUser.uid, "registros", id));
-                    await loadUserDataFromFirestore();
-                    initUI();
-                } catch (error) {
-                    console.error("Error eliminando documento: ", error);
-                }
-            }
-        }
-    });
 
     function renderChart() {
         const ctx = document.getElementById('weightChart').getContext('2d');
@@ -1027,7 +1037,7 @@
         });
     }
 
-    // Backup JSON Manual
+    // Backups locales
     btnExport.addEventListener('click', () => {
         if(healthData.length === 0) return;
         const dataObj = { userHeight, healthData };
