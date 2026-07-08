@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Control de Peso e IMC Pro</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome para iconos -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --primary: #4f46e5;
+            --primary-hover: #4338ca;
+            --primary-light: #eef2ff;
+            --danger: #ef4444;
+            --danger-hover: #dc2626;
+            --bg: #f8fafc;
+            --card: #ffffff;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            
+            /* Colores de Rangos */
+            --color-bajo: #3b82f6;
+            --color-normal: #10b981;
+            --color-sobre: #f59e0b;
+            --color-obeso: #ef4444;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            min-height: 100vh;
+            padding-bottom: 50px;
+        }
+
+        /* BANNER SUPERIOR */
+        .banner {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            color: white;
+            padding: 16px 24px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .banner-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .banner-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .banner-title i {
+            font-size: 1.6rem;
+            color: #818cf8;
+        }
+
+        .banner-title h1 {
+            font-size: 1.3rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .btn-history {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-history:hover {
+            background-color: white;
+            color: #1e1b4b;
+            transform: translateY(-1px);
+        }
+
+        /* CONTENEDOR PRINCIPAL */
+        .container {
+            max-width: 1200px;
+            margin: 25px auto 0;
+            padding: 0 20px;
+        }
+
+        /* TARJETAS DE RESUMEN (KPIS) */
+        .kpi-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .kpi-card {
+            background: var(--card);
+            padding: 20px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .kpi-info p {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .kpi-info h3 {
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: var(--text-main);
+        }
+
+        .kpi-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+
+        .kpi-blue { background-color: #eff6ff; color: #2563eb; }
+        .kpi-purple { background-color: #f5f3ff; color: #6366f1; }
+        .kpi-emerald { background-color: #ecfdf5; color: #059669; }
+
+        /* REJILLA INFERIOR */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+
+        @media (min-width: 768px) {
+            .main-grid {
+                grid-template-columns: 1fr 1.4fr;
+            }
+        }
+
+        .card {
+            background: var(--card);
+            padding: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        h2 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        h2 i { color: var(--primary); }
+
+        /* FORMULARIOS e INPUTS */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 14px;
+            color: var(--text-muted);
+        }
+
+        input {
+            width: 100%;
+            padding: 11px 14px 11px 40px;
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            color: var(--text-main);
+            transition: all 0.2s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        /* Bloqueo sutil si falta la altura */
+        .form-disabled-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.92);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            text-align: center;
+            z-index: 5;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        /* Botones de atajo de fechas */
+        .date-shortcuts {
+            display: flex;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .btn-shortcut {
+            background: #e2e8f0;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-shortcut:hover, .btn-shortcut.active {
+            background: var(--primary);
+            color: white;
+        }
+
+        .btn-action {
+            width: 100%;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-action:hover { background-color: var(--primary-hover); }
+
+        /* ALERTA EMERGENTE (TOAST DE IMC - 30 SEGUNDOS) */
+        .toast-container {
+            position: fixed;
+            top: 80px;
+            right: 24px;
+            z-index: 1100;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 380px;
+            width: 90%;
+        }
+
+        .toast {
+            background: var(--card);
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            position: relative;
+            display: none;
+            animation: toastIn 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .toast.active { display: block; }
+        .toast-body { padding: 20px; display: flex; flex-direction: column; gap: 8px; }
+        .toast-header { display: flex; justify-content: space-between; align-items: center; }
+        .toast-title { font-size: 0.9rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .btn-toast-close { background: transparent; border: none; color: var(--text-muted); cursor: pointer; font-size: 1rem; }
+        .toast-content { display: flex; align-items: center; gap: 16px; margin: 4px 0; }
+        .toast-value { font-size: 2.4rem; font-weight: 800; line-height: 1; }
+        .badge { display: inline-block; padding: 6px 14px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
+        .motivation-text { font-size: 0.85rem; color: var(--text-muted); line-height: 1.45; }
+
+        .toast-progress { position: absolute; bottom: 0; left: 0; height: 4px; width: 100%; background-color: rgba(0,0,0,0.05); }
+        .toast-progress-bar { height: 100%; width: 100%; transform-origin: left; }
+        .toast.active .toast-progress-bar { animation: shrinkProgress 30s linear forwards; }
+
+        /* Colores Rangos Toast */
+        .bajo-peso .toast-value { color: #2563eb; } .bajo-peso .toast-progress-bar { background-color: #2563eb; } .bajo-peso .badge { background-color: #eff6ff; color: #1d4ed8; border: 1px solid #bfdbfe; }
+        .normal .toast-value { color: #059669; } .normal .toast-progress-bar { background-color: #059669; } .normal .badge { background-color: #ecfdf5; color: #047857; border: 1px solid #a7f3d0; }
+        .sobrepeso .toast-value { color: #d97706; } .sobrepeso .toast-progress-bar { background-color: #d97706; } .sobrepeso .badge { background-color: #fffbeb; color: #b45309; border: 1px solid #fde68a; }
+        .obesidad .toast-value { color: #dc2626; } .obesidad .toast-progress-bar { background-color: #dc2626; } .obesidad .badge { background-color: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+
+        /* GRÁFICA */
+        .chart-container { position: relative; height: 380px; width: 100%; }
+
+        /* MODAL DEL HISTORIAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(15, 23, 42, 0.3);
+            backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+        .modal.active { display: flex; }
+        .modal-content {
+            background: var(--card);
+            padding: 28px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 750px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 12px;
+        }
+        .btn-close {
+            background: #f1f5f9; border: none; color: var(--text-muted);
+            width: 36px; height: 36px; border-radius: 50%; cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        /* Acciones de Respaldo */
+        .backup-actions {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 20px;
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 12px;
+            border: 1px dashed var(--border);
+        }
+        .btn-backup {
+            background: white; border: 1px solid var(--border);
+            padding: 8px 14px; border-radius: 8px; font-size: 0.85rem;
+            font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px;
+            color: var(--text-main);
+        }
+        .btn-backup:hover { background: #f1f5f9; }
+
+        /* TABLA */
+        table { width: 100%; border-collapse: collapse; text-align: left; }
+        th, td { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+        th { background-color: #f8fafc; color: var(--text-muted); font-weight: 700; }
+        .btn-delete {
+            background: transparent; color: var(--danger);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            padding: 6px 12px; border-radius: 6px;
+            font-weight: 600; font-size: 0.8rem; cursor: pointer;
+        }
+        .btn-delete:hover { background: var(--danger); color: white; }
+
+        @keyframes toastIn { from { opacity: 0; transform: translateY(-20px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        @keyframes shrinkProgress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+    </style>
+</head>
+<body>
+
+<!-- Contenedor de la Notificación Flotante -->
+<div class="toast-container">
+    <div id="imcToast" class="toast">
+        <div class="toast-body">
+            <div class="toast-header">
+                <span class="toast-title"><i class="fa-solid fa-square-poll-horizontal"></i> Resultado Calculado</span>
+                <button id="btnToastClose" class="btn-toast-close"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="toast-content">
+                <div id="toastValue" class="toast-value">--</div>
+                <div><span id="toastBadge" class="badge">--</span></div>
+            </div>
+            <div id="toastMotivation" class="motivation-text">--</div>
+        </div>
+        <div class="toast-progress"><div class="toast-progress-bar"></div></div>
+    </div>
+</div>
+
+<header class="banner">
+    <div class="banner-container">
+        <div class="banner-title">
+            <i class="fa-solid fa-heart-pulse"></i>
+            <h1>Control de Peso e IMC</h1>
+        </div>
+        <button id="btnOpenHistory" class="btn-history">
+            <i class="fa-solid fa-clock-history"></i> Historial
+        </button>
+    </div>
+</header>
+
+<div class="container">
+    <!-- Indicadores Rápidos (KPIs) -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <div class="kpi-info"><p>Último Peso</p><h3 id="kpiWeight">-- kg</h3></div>
+            <div class="kpi-icon kpi-blue"><i class="fa-solid fa-weight-scale"></i></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-info"><p>IMC Actual</p><h3 id="kpiImc">--</h3></div>
+            <div class="kpi-icon kpi-purple"><i class="fa-solid fa-calculator"></i></div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-info"><p>Evolución Total</p><h3 id="kpiDiff">-- kg</h3></div>
+            <div class="kpi-icon kpi-emerald" id="kpiDiffIcon"><i class="fa-solid fa-right-left"></i></div>
+        </div>
+    </div>
+
+    <div class="main-grid">
+        <div>
+            <!-- Configuración de Altura Fija -->
+            <div class="card">
+                <h2><i class="fa-solid fa-user-gear"></i> Datos de Perfil</h2>
+                <div class="form-group">
+                    <label for="height">Altura Fija (cm):</label>
+                    <div class="input-wrapper">
+                        <i class="fa-solid fa-ruler-vertical"></i>
+                        <input type="number" id="height" step="1" placeholder="Ej. 175">
+                    </div>
+                </div>
+                <button id="btnSaveProfile" class="btn-action" style="background-color: #64748b;">Guardar / Actualizar Altura</button>
+            </div>
+
+            <!-- Entrada de Datos Diarios -->
+            <div class="card">
+                <!-- Capa de bloqueo controlado si no hay altura asignada -->
+                <div id="formOverlay" class="form-disabled-overlay" style="display: none;">
+                    <div>
+                        <i class="fa-solid fa-lock" style="font-size: 1.6rem; color: #4f46e5; margin-bottom: 12px;"></i>
+                        <p>Asigna tu altura en la sección de arriba para habilitar el registro diario.</p>
+                    </div>
+                </div>
+
+                <h2><i class="fa-solid fa-calendar-plus"></i> Registro Diario</h2>
+                <form id="weightForm">
+                    <div class="form-group">
+                        <label for="weight">Peso registrado (kg):</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-weight-scale"></i>
+                            <input type="number" id="weight" step="0.1" placeholder="Ej. 70.5" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="date">Fecha del registro:</label>
+                        <div class="input-wrapper">
+                            <i class="fa-solid fa-calendar-day"></i>
+                            <input type="date" id="date" required>
+                        </div>
+                        <div class="date-shortcuts">
+                            <button type="button" id="btnToday" class="btn-shortcut active">Hoy</button>
+                            <button type="button" id="btnYesterday" class="btn-shortcut">Ayer</button>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-action">Guardar Registro</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Sección de Análisis Visual -->
+        <div class="card">
+            <h2><i class="fa-solid fa-chart-line"></i> Línea de Evolución Temporal</h2>
+            <div class="chart-container">
+                <canvas id="weightChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Ventana de Historial de Registros -->
+<div id="historyModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fa-solid fa-clipboard-list" style="color: var(--primary);"></i> Historial de Evaluaciones</h2>
+            <button id="btnCloseHistory" class="btn-close"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+        
+        <!-- Herramientas de Importación/Exportación Local (Opcionales por si quieres usarlas offline) -->
+        <div class="backup-actions">
+            <button id="btnExport" class="btn-backup"><i class="fa-solid fa-download" style="color: #059669;"></i> Exportar a JSON</button>
+            <button id="btnImportClick" class="btn-backup"><i class="fa-solid fa-upload" style="color: #2563eb;"></i> Importar desde JSON</button>
+            <input type="file" id="fileImport" accept=".json" style="display: none;">
+        </div>
+
+        <div style="overflow-x: auto;">
+            <table id="historyTable">
+                <thead>
+                    <tr><th>Fecha</th><th>Peso</th><th>Altura</th><th>Estado IMC</th><th>Acción</th></tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- CONFIGURACIÓN DE FIREBASE Y LÓGICA DE LA APLICACIÓN -->
+<script type="module">
+    // Importación de módulos SDK de Firebase v10+ vía CDN
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
+    import { 
+        getFirestore, doc, setDoc, getDoc, collection, addDoc, getDocs, deleteDoc, query, orderBy 
+    } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+    // Tu configuración web de Firebase entregada
+    const firebaseConfig = {
+        apiKey: "AIzaSyBwH4V6-IHmRqK-YYNd6pRfgtHhOYuUIzU",
+        authDomain: "registro-de-peso-dd721.firebaseapp.com",
+        projectId: "registro-de-peso-dd721",
+        storageBucket: "registro-de-peso-dd721.firebasestorage.app",
+        messagingSenderId: "817912343750",
+        appId: "1:817912343750:web:3a9af1913f8db3915e7bc7",
+        measurementId: "G-Q545TTN4GR"
+    };
+
+    // Inicializar Firebase e Instancias
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app);
+    const db = getFirestore(app);
+
+    // Referencias de Elementos de la UI
+    const weightForm = document.getElementById('weightForm');
+    const heightInput = document.getElementById('height');
+    const weightInput = document.getElementById('weight');
+    const dateInput = document.getElementById('date');
+    const tableBody = document.querySelector('#historyTable tbody');
+    const btnSaveProfile = document.getElementById('btnSaveProfile');
+    const formOverlay = document.getElementById('formOverlay');
+    
+    const btnToday = document.getElementById('btnToday');
+    const btnYesterday = document.getElementById('btnYesterday');
+
+    const btnExport = document.getElementById('btnExport');
+    const btnImportClick = document.getElementById('btnImportClick');
+    const fileImport = document.getElementById('fileImport');
+
+    const imcToast = document.getElementById('imcToast');
+    const toastValue = document.getElementById('toastValue');
+    const toastBadge = document.getElementById('toastBadge');
+    const toastMotivation = document.getElementById('toastMotivation');
+    const btnToastClose = document.getElementById('btnToastClose');
+    let toastTimeout;
+
+    const kpiWeight = document.getElementById('kpiWeight');
+    const kpiImc = document.getElementById('kpiImc');
+    const kpiDiff = document.getElementById('kpiDiff');
+    const kpiDiffIcon = document.getElementById('kpiDiffIcon');
+
+    const historyModal = document.getElementById('historyModal');
+    const btnOpenHistory = document.getElementById('btnOpenHistory');
+    const btnCloseHistory = document.getElementById('btnCloseHistory');
+
+    let weightChart;
+    let healthData = [];
+    let userHeight = "";
+
+    const todayStr = new Date().toISOString().split('T')[0];
+    dateInput.value = todayStr;
+
+    // Inicialización asíncrona conectada a Firestore
+    async function startApplication() {
+        await loadUserDataFromFirestore();
+        initUI();
+    }
+
+    // 1. Cargar Datos desde Firestore de forma asíncrona
+    async function loadUserDataFromFirestore() {
+        try {
+            // Cargar Altura del Perfil único (Documento fijo en la colección 'perfil')
+            const profileRef = doc(db, "perfil", "usuario_unico");
+            const profileSnap = await getDoc(profileRef);
+            if (profileSnap.exists()) {
+                userHeight = profileSnap.data().height || "";
+                heightInput.value = userHeight;
+            }
+
+            // Cargar Colección de Registros Diarios ordenados por fecha cronológicamente
+            const recordsRef = collection(db, "registros");
+            const q = query(recordsRef, orderBy("date", "asc"));
+            const querySnapshot = await getDocs(q);
+            
+            healthData = [];
+            querySnapshot.forEach((doc) => {
+                healthData.push({ id: doc.id, ...doc.data() });
+            });
+        } catch (error) {
+            console.error("Error cargando base de datos Firebase: ", error);
+        }
+    }
+
+    function initUI() {
+        checkFormLock();
+        calculateKPIs();
+        renderTable();
+        renderChart();
+    }
+
+    function checkFormLock() {
+        if (!userHeight || userHeight <= 0) {
+            formOverlay.style.display = "flex";
+        } else {
+            formOverlay.style.display = "none";
+        }
+    }
+
+    // Atajos Rápidos de fecha
+    btnToday.addEventListener('click', () => {
+        dateInput.value = todayStr;
+        btnToday.classList.add('active');
+        btnYesterday.classList.remove('active');
+    });
+
+    btnYesterday.addEventListener('click', () => {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        dateInput.value = yesterday.toISOString().split('T')[0];
+        btnYesterday.classList.add('active');
+        btnToday.classList.remove('active');
+    });
+
+    dateInput.addEventListener('change', () => {
+        if (dateInput.value === todayStr) {
+            btnToday.classList.add('active');
+            btnYesterday.classList.remove('active');
+        } else {
+            const yesterday = new Date();
+            yesterday.setDate(yesterday.getDate() - 1);
+            const yesterdayStr = yesterday.toISOString().split('T')[0];
+            if (dateInput.value === yesterdayStr) {
+                btnYesterday.classList.add('active');
+                btnToday.classList.remove('active');
+            } else {
+                btnToday.classList.remove('active');
+                btnYesterday.classList.remove('active');
+            }
+        }
+    });
+
+    function getImcInfo(imc) {
+        if (imc < 18.5) return { label: "Bajo peso", class: "bajo-peso", text: "Estás por debajo del peso recomendado. ¡Asegúrate de mantener un plan nutricional completo!" };
+        if (imc < 25) return { label: "Normal", class: "normal", text: "¡Excelente! Te encuentras en el rango ideal. Sigue preservando tus buenos hábitos cotidianos." };
+        if (imc < 30) return { label: "Sobrepeso", class: "sobrepeso", text: "Ligeramente por encima de tu peso ideal. Pequeños ajustes estratégicos marcarán la diferencia." };
+        return { label: "Obesidad", class: "obesidad", text: "Rango de cuidado. Prioriza tu salud adoptando pautas de ejercicio guiadas y asesoría profesional." };
+    }
+
+    function formatDateFriendly(dateStr) {
+        const parts = dateStr.split('-');
+        if(parts.length !== 3) return dateStr;
+        const dateObj = new Date(parts[0], parts[1] - 1, parts[2]);
+        return dateObj.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function calculateKPIs() {
+        if (healthData.length === 0) {
+            kpiWeight.innerText = "-- kg"; kpiImc.innerText = "--"; kpiDiff.innerText = "-- kg";
+            kpiDiffIcon.innerHTML = `<i class="fa-solid fa-right-left"></i>`;
+            return;
+        }
+        const latest = healthData[healthData.length - 1];
+        kpiWeight.innerText = `${latest.weight} kg`;
+        kpiImc.innerText = latest.imc;
+
+        if (healthData.length > 1) {
+            const first = healthData[0];
+            const diff = (latest.weight - first.weight).toFixed(1);
+            if (diff > 0) {
+                kpiDiff.innerText = `+${diff} kg`;
+                kpiDiffIcon.innerHTML = `<i class="fa-solid fa-arrow-trend-up" style="color: #ef4444"></i>`;
+            } else if (diff < 0) {
+                kpiDiff.innerText = `${diff} kg`;
+                kpiDiffIcon.innerHTML = `<i class="fa-solid fa-arrow-trend-down" style="color: #10b981"></i>`;
+            } else {
+                kpiDiff.innerText = "0 kg";
+                kpiDiffIcon.innerHTML = `<i class="fa-solid fa-minus" style="color: #64748b"></i>`;
+            }
+        } else {
+            kpiDiff.innerText = "0 kg";
+            kpiDiffIcon.innerHTML = `<i class="fa-solid fa-minus" style="color: #64748b"></i>`;
+        }
+    }
+
+    function showImcToast(imc, imcInfo) {
+        clearTimeout(toastTimeout);
+        imcToast.classList.remove('active');
+        void imcToast.offsetWidth;
+        imcToast.className = `toast active ${imcInfo.class}`;
+        toastValue.innerText = imc;
+        toastBadge.innerText = imcInfo.label;
+        toastMotivation.innerText = imcInfo.text;
+        toastTimeout = setTimeout(() => { imcToast.classList.remove('active'); }, 30000);
+    }
+
+    btnToastClose.addEventListener('click', () => { clearTimeout(toastTimeout); imcToast.classList.remove('active'); });
+
+    // 2. Guardar Altura en Firestore
+    btnSaveProfile.addEventListener('click', async () => {
+        const val = heightInput.value;
+        if(val && val > 0) {
+            userHeight = val;
+            try {
+                await setDoc(doc(db, "perfil", "usuario_unico"), { height: val });
+            } catch (e) {
+                console.error("Error guardando altura en Firestore: ", e);
+            }
+        } else {
+            userHeight = "";
+        }
+        initUI();
+    });
+
+    btnOpenHistory.addEventListener('click', () => historyModal.classList.add('active'));
+    btnCloseHistory.addEventListener('click', () => historyModal.classList.remove('active'));
+    window.addEventListener('click', (e) => { if (e.target === historyModal) historyModal.classList.remove('active'); });
+
+    // 3. Crear / Actualizar Registro de peso en Firestore
+    weightForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        if (!userHeight) return;
+
+        const weight = parseFloat(weightInput.value);
+        const date = dateInput.value;
+        const heightInMeters = parseFloat(userHeight) / 100;
+        const imc = (weight / (heightInMeters * heightInMeters)).toFixed(1);
+        const imcInfo = getImcInfo(imc);
+
+        showImcToast(imc, imcInfo);
+
+        const newRecordData = { date, weight, height: parseFloat(userHeight), imc };
+        
+        try {
+            // Verificar si la fecha ya existe para sobreescribir o crear nuevo
+            const existingItem = healthData.find(item => item.date === date);
+            if (existingItem) {
+                await setDoc(doc(db, "registros", existingItem.id), newRecordData);
+            } else {
+                await addDoc(collection(db, "registros"), newRecordData);
+            }
+            
+            // Recargar datos y refrescar interfaz
+            await loadUserDataFromFirestore();
+            weightInput.value = '';
+            initUI();
+        } catch (error) {
+            console.error("Error al guardar registro en Firestore: ", error);
+        }
+    });
+
+    // 4. Eliminar Registro en Firestore
+    window.deleteRecord = async function(id) {
+        if(confirm("¿Estás seguro de eliminar este registro de la base de datos externa?")) {
+            try {
+                await deleteDoc(doc(db, "registros", id));
+                await loadUserDataFromFirestore();
+                initUI();
+            } catch (error) {
+                console.error("Error eliminando documento: ", error);
+            }
+        }
+    }
+
+    function renderTable() {
+        tableBody.innerHTML = '';
+        if (healthData.length === 0) {
+            tableBody.innerHTML = `<tr><td colspan="5" style="text-align:center; color: var(--text-muted);">Sin registros disponibles en Firestore.</td></tr>`;
+            return;
+        }
+        [...healthData].reverse().forEach(item => {
+            const imcInfo = getImcInfo(item.imc);
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><strong>${formatDateFriendly(item.date)}</strong></td>
+                <td>${item.weight} kg</td>
+                <td>${item.height} cm</td>
+                <td><span class="badge ${imcInfo.class}">${item.imc} - ${imcInfo.label}</span></td>
+                <td><button class="btn-delete" onclick="deleteRecord('${item.id}')">Eliminar</button></td>
+            `;
+            tableBody.appendChild(row);
+        });
+    }
+
+    function renderChart() {
+        const ctx = document.getElementById('weightChart').getContext('2d');
+        const labels = healthData.map(item => formatDateFriendly(item.date));
+        const weights = healthData.map(item => item.weight);
+
+        if (weightChart) weightChart.destroy();
+
+        const hMeters = (parseFloat(userHeight) || 170) / 100;
+        const limitBajo = (18.5 * hMeters * hMeters).toFixed(1);
+        const limitNormal = (25.0 * hMeters * hMeters).toFixed(1);
+        const limitSobre = (30.0 * hMeters * hMeters).toFixed(1);
+
+        const rbgBandsPlugin = {
+            id: 'rbgBands',
+            beforeDraw(chart) {
+                if(healthData.length === 0) return;
+                const { ctx, chartArea: { top, bottom, left, right }, scales: { y } } = chart;
+                function drawBand(yStart, yEnd, color) {
+                    const canvasYStart = Math.max(y.getPixelForValue(yStart), top);
+                    const canvasYEnd = Math.min(y.getPixelForValue(yEnd), bottom);
+                    if(canvasYStart > bottom || canvasYEnd < top) return;
+                    ctx.fillStyle = color; ctx.fillRect(left, canvasYStart, right - left, canvasYEnd - canvasYStart);
+                }
+                ctx.save();
+                drawBand(y.max, limitBajo, 'rgba(59, 130, 246, 0.03)');
+                drawBand(limitBajo, limitNormal, 'rgba(16, 185, 129, 0.03)');
+                drawBand(limitNormal, limitSobre, 'rgba(245, 158, 11, 0.03)');
+                drawBand(limitSobre, y.min, 'rgba(239, 68, 110, 0.03)');
+                ctx.restore();
+            }
+        };
+
+        weightChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels.length > 0 ? labels : ['Sin datos'],
+                datasets: [{
+                    label: 'Peso (kg)',
+                    data: weights.length > 0 ? weights : [0],
+                    borderColor: '#4f46e5',
+                    borderWidth: 3,
+                    tension: 0.22,
+                    pointBackgroundColor: '#4f46e5',
+                    pointBorderColor: '#ffffff',
+                    pointBorderWidth: 2,
+                    pointRadius: healthData.length > 0 ? 5 : 0,
+                    fill: false
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: { grid: { display: false }, ticks: { color: '#64748b' } },
+                    y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b' } }
+                }
+            },
+            plugins: [rbgBandsPlugin]
+        });
+    }
+
+    // Funciones de Respaldo por JSON Manual (Compatibilidad local)
+    btnExport.addEventListener('click', () => {
+        if(healthData.length === 0) return;
+        const dataObj = { userHeight, healthData };
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataObj));
+        const dlAnchor = document.createElement('a');
+        dlAnchor.setAttribute("href", dataStr);
+        dlAnchor.setAttribute("download", `respaldo_salud_${dateInput.value}.json`);
+        document.body.appendChild(dlAnchor);
+        dlAnchor.click();
+        dlAnchor.remove();
+    });
+
+    btnImportClick.addEventListener('click', () => fileImport.click());
+    fileImport.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = async function(evt) {
+            try {
+                const parsed = JSON.parse(evt.target.result);
+                if(parsed.userHeight && Array.isArray(parsed.healthData)) {
+                    // Migrar archivo local a Firestore masivamente
+                    await setDoc(doc(db, "perfil", "usuario_unico"), { height: parsed.userHeight });
+                    for (const row of parsed.healthData) {
+                        await addDoc(collection(db, "registros"), {
+                            date: row.date,
+                            weight: row.weight,
+                            height: row.height,
+                            imc: row.imc
+                        });
+                    }
+                    alert("¡Datos importados y subidos a Firestore con éxito!");
+                    await startApplication();
+                    historyModal.classList.remove('active');
+                }
+            } catch(err) {
+                alert("Error al leer el archivo estructurado.");
+            }
+        };
+        reader.readAsText(file);
+    });
+
+    // Encendido Inicial
+    startApplication();
+</script>
+
+</body>
+</html>
